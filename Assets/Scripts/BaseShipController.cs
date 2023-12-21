@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using TMPro;
 using UnityEngine.UI;
+using System;
 
 public class BaseShipController : MonoBehaviour
 {
@@ -19,6 +20,8 @@ public class BaseShipController : MonoBehaviour
     protected LineRenderer lineRenderer;
 
     public Image selectedIMG;
+
+ 
 
     protected GeneralShipController shipController;
 

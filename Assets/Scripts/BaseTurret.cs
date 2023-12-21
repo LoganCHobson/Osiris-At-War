@@ -1,87 +1,91 @@
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class BaseTurret : MonoBehaviour
 {
-    public Transform turretHead;
-    public Transform firePoint;
-    public float rotationSpeed = 5f;
-    public float elevationSpeed = 2f;
-    public float fireRate = 1f;
-    public int damage = 10;
-    public GameObject projectilePrefab;
+    public float fireRate = 1.0f;
+    public Transform head;
+    public Transform firingPoint;
+    public Transform target;
 
-    public float range;
+    ObjectPool pool;
+    float lastShootTime;
+    public string team;
+    float range;
 
-    private float elevationAngle = 0f; 
-    private float nextFireTime;
-    private Transform currentTarget;
 
-    protected virtual void Update()
+    TargetingMaster targetList;
+    private void Start()
     {
-        TargetAndFire();
-        TraverseTurretUpDown();
+        range = GetComponentInParent<GeneralShipController>().range;
+        team = GetComponentInParent<GeneralShipController>().opposingTeam;
+        targetList = GetComponentInParent<TargetingMaster>();
+        pool = GetComponent<ObjectPool>();
+        //target = GameObject.FindGameObjectWithTag("Enemy").transform;
     }
 
-    protected virtual void TargetAndFire()
+    private void Update()
     {
-        if (currentTarget == null)
+        if (target != null)
         {
-            FindNewTarget();
+            head.LookAt(target.position);
+            if (Physics.Raycast(firingPoint.position, target.position - firingPoint.position, out RaycastHit hit, range) && hit.collider.CompareTag(team))
+            {
+                Debug.Log("Shooting");
+                Shoot();
+            }
+            Debug.DrawRay(firingPoint.position, target.position - firingPoint.position);
         }
+        
         else
         {
-            // Rotate turret head to face the current target
-            RotateTurretHead(currentTarget.position);
+            GetComponentInParent<TargetingMaster>().playerSelected = false;
+            target = GetClosestTarget();
+        }
+       
+    }
 
-            // Fire at the current target
-            if (Time.time >= nextFireTime && Vector3.Distance(currentTarget.position, gameObject.transform.position) <= range)  
+    Transform GetClosestTarget()
+    {
+        List<GameObject> ships = targetList.targetAbleShips;
+
+        if(ships.Count == 0)
+        {
+            return null;
+        }
+
+        Transform closestShip = null;
+        float closestDistance = Mathf.Infinity;
+
+        foreach (GameObject ship in ships)
+        {
+            float distance = Vector3.Distance(transform.position, ship.transform.position);
+            if (distance < closestDistance)
             {
-                Fire(currentTarget.position);
-                nextFireTime = Time.time + 1f / fireRate;
+                closestDistance = distance;
+                closestShip = ship.transform.parent;
             }
         }
+        Debug.Log("ClosestShip =   " + closestShip);
+        Transform target = closestShip.Find("HardPoints").GetChild(Random.Range(0, closestShip.Find("HardPoints").childCount)); //Basically find the child named HardPoints, which is an empty parent I use to organize HardPoints and then chose a random child from there to target.
+        Debug.Log("Target = " + target);
+        return target;
     }
 
-    protected virtual void FindNewTarget()
-    {
-        GameObject[] potentialTargets = GameObject.FindGameObjectsWithTag("EnemyShip");
 
-        if (potentialTargets.Length > 0)
+    public void Shoot()
+    {
+        if (Time.time - lastShootTime >= fireRate)
         {
-            currentTarget = GetRandomTarget(potentialTargets);
+            Debug.Log("Fired!");
+            GameObject temp = pool.Spawn(firingPoint.position);
+            temp.transform.rotation = Quaternion.LookRotation(target.position - firingPoint.position, Vector3.up);
+            temp.transform.Rotate(Vector3.forward, 90f);
+            temp.GetComponent<Laser>().pool = pool;
+            temp.GetComponent<Laser>().team = team;
+            lastShootTime = Time.time;
         }
     }
 
-    protected virtual Transform GetRandomTarget(GameObject[] potentialTargets)
-    {
-        return potentialTargets[Random.Range(0, potentialTargets.Length)].transform;
-    }
 
-    protected virtual void RotateTurretHead(Vector3 targetPosition)
-    {
-        // Rotate turret head to face the target
-        Vector3 targetDirection = targetPosition - turretHead.position;
-        Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
-        turretHead.rotation = Quaternion.RotateTowards(turretHead.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-    }
-
-    protected virtual void TraverseTurretUpDown()
-    {
-        float inputVertical = Input.GetAxis("Vertical");  // Get input for turret elevation
-        elevationAngle += inputVertical * elevationSpeed * Time.deltaTime;
-
-        // Clamp the elevation angle to a reasonable range
-        elevationAngle = Mathf.Clamp(elevationAngle, -45f, 45f);
-
-        // Rotate turret head up and down based on the elevation angle
-        turretHead.localRotation = Quaternion.Euler(elevationAngle, 0f, 0f);
-    }
-
-    protected virtual void Fire(Vector3 targetPosition)
-    {
-        // Instantiate a projectile or perform the firing logic
-        GameObject temp = Instantiate(projectilePrefab, firePoint.position, Quaternion.LookRotation(targetPosition - firePoint.position));
-        temp.GetComponent<Rigidbody>().AddForce(transform.forward * 20, ForceMode.Impulse);
-    }
 }

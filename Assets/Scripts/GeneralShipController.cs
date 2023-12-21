@@ -6,7 +6,11 @@ public class GeneralShipController : BaseShipController
 
     public bool isSelected = false;
 
+    public string opposingTeam;
+
+    public float range;
     
+   
     protected override void Update()
     {
         if (isSelected)
