@@ -10,6 +10,7 @@ TagManager:
   - TeamB
   - EnemyHardPoint
   - DropZone
+  - FriendlyPlanet
   layers:
   - Default
   - TransparentFX
