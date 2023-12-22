@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using Unity.VisualScripting;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 public class PlanetManager : MonoBehaviour
@@ -11,13 +9,18 @@ public class PlanetManager : MonoBehaviour
     public GameObject planetInfoUI;
     public GameObject dropZone;
 
+
+
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            ReturnChildren();
-            ToggleUi(planetInfoUI);
+            ClearPlanetUI();
+            planetInfoUI.SetActive(false);
         }
+
+        //UpdatePanel();
     }
 
     void ToggleUi(GameObject _obj)
@@ -29,54 +32,64 @@ public class PlanetManager : MonoBehaviour
     public void UpdatePlanetInfo()
     {
         Debug.Log("Updating");
-        Transform[] dropZoneChildren = dropZone.GetComponentsInChildren<Transform>(true);
-        foreach (Transform zone in dropZoneChildren)
+        
+        foreach (Transform zone in dropZone.transform)
         {
-            Debug.Log("Looping");
-            fleetData = zone.GetComponentInChildren<FleetData>();
-            Transform hiddenLayoutInfo = zone.Find("HiddenLayoutInfo");
-            if (hiddenLayoutInfo != null)
+            if (zone != dropZone.transform)
             {
-                Debug.Log("Moving");
-                GameObject panel = planetInfoUI.transform.GetChild(zone.transform.GetSiblingIndex() + 2).gameObject;
-
-                foreach (Transform child in hiddenLayoutInfo)
+                Debug.Log("Looping");
+                if (zone.GetComponentInChildren<FleetData>())
                 {
-                    child.SetParent(panel.transform, false);
+                    FleetData temp = zone.GetComponentInChildren<FleetData>();
+                    GameObject panel = planetInfoUI.transform.GetChild(zone.transform.GetSiblingIndex() + 2).gameObject;
+                    foreach (GameObject ship in temp.Ships)
+                    {
+                        Instantiate(ship, panel.transform);
+                    }
                 }
-
-
             }
-            else { Debug.Log("Not Found"); }
 
         }
     }
 
-    void ReturnChildren()
+    public void ClearPlanetUI()
     {
-        Transform[] dropZoneChildren = dropZone.GetComponentsInChildren<Transform>(true);
-        foreach (Transform zone in dropZoneChildren)
+        
+        foreach(Transform fleetUI in planetInfoUI.transform)
         {
-            Debug.Log("Looping");
-            fleetData = zone.GetComponentInChildren<FleetData>();
-            Transform hiddenLayoutInfo = zone.Find("HiddenLayoutInfo");
-            if (hiddenLayoutInfo != null)
+            if(fleetUI.GetSiblingIndex() != 0 && fleetUI.GetSiblingIndex() != 1)
             {
-                Debug.Log("Moving");
-                
-
-                foreach (Transform child in hiddenLayoutInfo)
+                foreach (Transform child in fleetUI.transform)
                 {
-                    child.SetParent(hiddenLayoutInfo.transform, false);
+                    GameObject.Destroy(child.gameObject);
                 }
-
-
             }
-            else { Debug.Log("Not Found"); }
-
         }
     }
 
-    
+    public void UpdatePanel()
+    {
+        foreach (Transform zone in dropZone.transform)
+        {
+            if (zone != dropZone.transform)
+            {
+                Debug.Log("Looping");
+                if (zone.GetComponentInChildren<FleetData>())
+                {
+                    FleetData temp = zone.GetComponentInChildren<FleetData>();
+                    GameObject panel = planetInfoUI.transform.GetChild(zone.transform.GetSiblingIndex() + 2).gameObject;
+                    foreach (GameObject ship in temp.Ships)
+                    {
+                        Instantiate(ship, panel.transform);
+                    }
+                }
+            }
+        }
+    }
+
+
 }
+
+
+
 

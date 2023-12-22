@@ -16,6 +16,7 @@ public class Health : MonoBehaviour
     {
         if(currentHealth <= 0)
         {
+            Destroy(gameObject.transform.parent.parent.parent.parent);
             Debug.Log("We died");
         }
     }

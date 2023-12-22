@@ -4,15 +4,33 @@ using UnityEngine;
 
 public class FleetData : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+  public List<GameObject> Ships = new List<GameObject>();
+    private void Start()
     {
-        
+        UpdateFleet();
+    }
+    void UpdateFleet()
+    {
+
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
+        if(Ships.Count == 0)
+        {
+            Destroy(gameObject);
+        }    
+
+
+    }
+
+    public void RemoveShip(GameObject _ship)
+    {
+        Ships.Remove(_ship);
+    }
+
+    public void AddShip(GameObject _ship)
+    {
+        Ships.Remove(_ship);
     }
 }

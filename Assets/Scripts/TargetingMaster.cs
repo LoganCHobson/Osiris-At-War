@@ -63,14 +63,17 @@ public class TargetingMaster : MonoBehaviour
 
     public void PlayerSelect(GameObject _target)
     {
-        targetAbleShips.Clear();
-        targetAbleShips.Add(_target);
-        Debug.Log("Added " + _target);
-        playerSelected = true;
-
-        foreach (BaseTurret turret in turrets)
+        if (_target.GetComponent<BaseTurret>())
         {
-            turret.target = _target.transform;
+            targetAbleShips.Clear();
+            targetAbleShips.Add(_target);
+            Debug.Log("Added " + _target);
+            playerSelected = true;
+
+            foreach (BaseTurret turret in turrets)
+            {
+                turret.target = _target.transform;
+            }
         }
     }
 }

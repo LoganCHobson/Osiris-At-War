@@ -28,6 +28,7 @@ public class BaseTurret : MonoBehaviour
     {
         if (target != null)
         {
+
             head.LookAt(target.position);
             if (Physics.Raycast(firingPoint.position, target.position - firingPoint.position, out RaycastHit hit, range) && hit.collider.CompareTag(team))
             {
@@ -78,9 +79,7 @@ public class BaseTurret : MonoBehaviour
         if (Time.time - lastShootTime >= fireRate)
         {
             Debug.Log("Fired!");
-            GameObject temp = pool.Spawn(firingPoint.position);
-            temp.transform.rotation = Quaternion.LookRotation(target.position - firingPoint.position, Vector3.up);
-            temp.transform.Rotate(Vector3.forward, 90f);
+            GameObject temp = pool.Spawn(firingPoint.position, Quaternion.LookRotation(target.position - firingPoint.position, Vector3.up));
             temp.GetComponent<Laser>().pool = pool;
             temp.GetComponent<Laser>().team = team;
             lastShootTime = Time.time;

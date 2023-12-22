@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using static UnityEngine.GraphicsBuffer;
 
 public class Laser : MonoBehaviour
@@ -26,13 +27,26 @@ public class Laser : MonoBehaviour
     void CheckHit(Vector3 _lastPos)
     {
         RaycastHit hit;
-        Physics.Raycast(_lastPos, transform.position, out hit, 2);
+        Physics.Linecast(_lastPos, transform.position, out hit, 2);
+        Debug.DrawRay(_lastPos, transform.position, Color.red);
         if(hit.collider != null)
         {
             if (hit.collider.CompareTag(team))
             {
-                hit.collider.GetComponentInParent<Health>().DealDamage(10);
+                if(!hit.collider.GetComponentInParent<Health>())
+                {
+                    hit.collider.GetComponentInParent<Health>().DealDamage(10);
+                }
+                else
+                {
+                    hit.collider.GetComponentInChildren<Health>().DealDamage(10);
+                }
             }
+            else
+            {
+                Debug.Log("Idk man");
+            }
+            
             pool.Recycle(gameObject);
         }
         else
