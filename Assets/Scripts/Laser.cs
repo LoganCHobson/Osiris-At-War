@@ -27,30 +27,33 @@ public class Laser : MonoBehaviour
     void CheckHit(Vector3 _lastPos)
     {
         RaycastHit hit;
-        Physics.Linecast(_lastPos, transform.position, out hit, 2);
-        Debug.DrawRay(_lastPos, transform.position, Color.red);
+        Physics.Linecast(_lastPos, transform.position, out hit);
+        Debug.DrawRay(_lastPos, (_lastPos - transform.position).normalized, Color.red);
         if(hit.collider != null)
         {
+            Debug.Log("Laser team = " + team);
             if (hit.collider.CompareTag(team))
             {
                 if(!hit.collider.GetComponentInParent<Health>())
                 {
-                    hit.collider.GetComponentInParent<Health>().DealDamage(10);
+                    hit.collider.GetComponentInChildren<Health>().DealDamage(10);
+                    
                 }
                 else
                 {
-                    hit.collider.GetComponentInChildren<Health>().DealDamage(10);
+                    hit.collider.GetComponentInParent<Health>().DealDamage(10);
                 }
             }
             else
             {
                 Debug.Log("Idk man");
             }
-            
+            Debug.Log("Hit! ");
             pool.Recycle(gameObject);
         }
         else
         {
+           
             pool.Recycle(gameObject, 5);
         }
         

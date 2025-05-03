@@ -7,7 +7,7 @@ public class TargetingMaster : MonoBehaviour
     string team;
     float range;
 
-    public Collider[] shipsInRange;
+    public List<Collider> shipsInRange;
 
     public bool playerSelected;
 
@@ -25,7 +25,7 @@ public class TargetingMaster : MonoBehaviour
         if (targetAbleShips.Count <= 0 && !playerSelected)
         {
             Debug.Log("Checkpoint2");
-            shipsInRange = Physics.OverlapSphere(transform.position, range, LayerMask.GetMask(team));
+            shipsInRange = new List<Collider>(Physics.OverlapSphere(transform.position, range, LayerMask.GetMask(team)));
             foreach (Collider collider in shipsInRange)
             {
                 if (!targetAbleShips.Contains(collider.transform.gameObject))
@@ -34,7 +34,7 @@ public class TargetingMaster : MonoBehaviour
                 }
             }
 
-            targetAbleShips.RemoveAll(ship => !System.Array.Exists(shipsInRange, collider => collider.gameObject == ship));
+            //targetAbleShips.RemoveAll(ship => !System.Array.Exists(shipsInRange, collider => collider.gameObject == ship));
 
         }
         if (targetAbleShips.Count > 0 && !playerSelected)
